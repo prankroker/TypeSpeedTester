@@ -1,5 +1,6 @@
 import TypingArea from "./TypingArea.jsx";
 import {useEffect, useRef, useState} from "react";
+import confetti from "canvas-confetti";
 
     const MAX_TIME = 60;
 
@@ -18,23 +19,13 @@ const SpeedTypingGame = () => {
     const [mistakes, setMistakes] = useState(0);
     const inputRef = useRef(null);
 
-    useEffect(() => {
-        let interval;
-        if (isTyping && timeLeft > 0) {
-            interval = setInterval(() => {
-                setTimeLeft((prevTime) => {
-                    if (prevTime <= 1) {
-                        setIsTyping(false);
-                        clearInterval(interval);
-                        return 0;
-                    }
-                    return prevTime - 1;
-                });
-            }, 1000);
-        }
-
-        return () => clearInterval(interval);
-    }, [isTyping]);
+    const celebrate = () => {
+        confetti({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.7 },
+        });
+    }
 
     const resetGame = () => {
         setIsTyping(false);
@@ -89,8 +80,28 @@ const SpeedTypingGame = () => {
 
         if (typedText === currentQuote) {
             setIsTyping(false);
+            celebrate();
+            inputRef.current?.blur();
         }
     };
+
+    useEffect(() => {
+        let interval;
+        if (isTyping && timeLeft > 0) {
+            interval = setInterval(() => {
+                setTimeLeft((prevTime) => {
+                    if (prevTime <= 1) {
+                        setIsTyping(false);
+                        clearInterval(interval);
+                        return 0;
+                    }
+                    return prevTime - 1;
+                });
+            }, 1000);
+        }
+
+        return () => clearInterval(interval);
+    }, [isTyping]);
 
     const timeFromStart = MAX_TIME - timeLeft;
     const wordsTyped = userInput.length / 5;
